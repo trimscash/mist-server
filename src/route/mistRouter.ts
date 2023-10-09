@@ -83,9 +83,9 @@ router.post('', (req, res, next) => {
       fs.unlinkSync(outputfilepath)
     }
     if (error instanceof ZodError) {
-      res.status(500).send()
+      res.status(500).send('ivalid request body')
     }
-    res.status(500).send()
+    res.status(500).send('internal server error')
   }
   next()
 })
