@@ -53,8 +53,8 @@ router.post('', (req, res, next) => {
     fs.writeFileSync(inputfilepath, decode)
 
     execSync(
-      `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
-      // `python3 mist_v3.py --block_num 2 -img temp/input/${filename} --output_name ${filename} --non_resize`,
+      // `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
+      `python3 mist_v3.py --block_num 2 -img temp/input/${filename} --output_name ${filename} --non_resize`,
       {
         cwd: mistDirectory,
       }
