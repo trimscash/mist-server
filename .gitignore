@@ -1,2 +1,4 @@
 mist/
 node_modules/
+
+.env
