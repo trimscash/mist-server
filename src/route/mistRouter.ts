@@ -4,9 +4,13 @@ import crypto from 'crypto'
 import path from 'path'
 // import { fileTypeFromBuffer, FileTypeResult } from 'file-type'
 import { z, ZodError } from 'zod'
-import { exec } from 'child_process'
+import childProcess, { execSync } from 'child_process'
 import dotenv from 'dotenv'
+import util from 'util'
+
 dotenv.config()
+
+const exec = util.promisify(childProcess.exec)
 
 const router = express.Router()
 
@@ -22,48 +26,55 @@ const requestSchema = z.object({
 
 const mistDirectory = process.env.MIST_DIRECTORY || ''
 
-router.post('', async (req, res, next) => {
+function checkPNG(data: Buffer): boolean {
+  const pngMagicNum = Buffer.from([0x89, 0x50, 0x4e, 0x47])
+  return pngMagicNum.equals(data.slice(0, 4))
+}
+
+router.post('', (req, res, next) => {
   const filename = `${crypto.randomUUID()}.png`
   const inputfilepath = path.join(mistDirectory, 'temp/input', filename)
   const outputfilepath = path.join(mistDirectory, 'temp/output', filename)
-  console.log(mistDirectory)
 
   try {
-    console.log('bbb')
+    console.log('running..' + filename)
     requestSchema.parse({ ...req.body })
-    console.log('ccc')
 
     const base64Data = req.body.image.replace(/^data:image\/png;base64,/, '')
-    // console.log(req.body.image)
-    console.log('req.body.image')
+
     const decode = Buffer.from(base64Data, 'base64')
-    // const type = await fileTypeFromBuffer(decode)
-    // if (type === undefined) {
-    //   return next(internalServerError('invalid file'))
-    // }
-    // if (type?.ext !== 'png') {
-    //   return next(internalServerError('invalid file type'))
-    // }
+
+    const isPNG = checkPNG(decode)
+    if (!isPNG) {
+      res.status(500).send('file must be png')
+      return
+    }
 
     fs.writeFileSync(inputfilepath, decode)
-    await exec(
-      `python3 mist_v3.py -img temp/input/${filename} --output_name ${filename}`,
+
+    execSync(
+      `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
+      // `python3 mist_v3.py -img temp/input/${filename} --output_name ${filename}`,
       {
         cwd: mistDirectory,
       }
     )
 
-    const output = fs.readFileSync(outputfilepath)
+    console.log(fs.existsSync(outputfilepath))
+    const outputBase64Data = fs.readFileSync(outputfilepath, {
+      encoding: 'base64',
+    })
 
-    /// remove temp file
+    // remove temp file
     if (fs.existsSync(inputfilepath)) {
       fs.unlinkSync(inputfilepath)
     }
     if (fs.existsSync(outputfilepath)) {
       fs.unlinkSync(outputfilepath)
     }
+    console.log('Done! ' + filename)
 
-    res.send('data:image/png;base64,/' + output.toString('base64'))
+    res.send({ image: 'data:image/png;base64,' + outputBase64Data })
   } catch (error) {
     if (fs.existsSync(inputfilepath)) {
       fs.unlinkSync(inputfilepath)

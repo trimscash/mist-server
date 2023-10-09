@@ -22,10 +22,10 @@ app.use(function (req, res, next) {
 app.use('/', mistRouter)
 
 // catch 404 and forward to error handler
-// app.use(function (req, res, next) {
-//     res.status(err.statusCode || 404).send({ message: err.message })
-// })
+app.use(function (req, res, next) {
+  res.status(404).send({ message: 'not found' })
+})
 
 app.listen(port, () => {
   console.log(`listening on port ${port}`)
-})
+}).timeout = 1000 * 60 * 10
