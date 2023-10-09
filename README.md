@@ -9,7 +9,7 @@ change tail of mist_v3.py
 ```python
 # tail of mist_v3.py
         output = Image.fromarray(output_image.astype(np.uint8))
-        output_name = os.path.join('./temp/output/', args.output_name)
+        output_name = args.output_name
         # save_parameter = '_' + str(epsilon) + '_' + str(steps) + '_' + str(input_size) + '_' + str(block_num) + '_' + str(mode) + '_' + str(args.rate) + '_' + str(int(mask)) + '_' + str(int(resize))
         # output_name += save_parameter + '.png'
         # output_name += '.png'
