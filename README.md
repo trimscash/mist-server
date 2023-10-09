@@ -2,6 +2,7 @@
 ```
 #.env
 MIST_DIRECTORY="{mist repository directory}"
+ALLOW_ORIGIN="{allow origin url}"
 ```
 
 change tail of mist_v3.py 
