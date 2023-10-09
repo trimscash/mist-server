@@ -84,8 +84,10 @@ router.post('', (req, res, next) => {
     }
     if (error instanceof ZodError) {
       res.status(500).send('ivalid request body')
+      return
     }
     res.status(500).send('internal server error')
+    return
   }
   next()
 })
