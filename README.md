@@ -18,6 +18,7 @@ change tail of mist_v3.py
 
 ```
 npm install
+conda activate mist
 npm start
 ```
 

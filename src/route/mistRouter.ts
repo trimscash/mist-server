@@ -54,7 +54,7 @@ router.post('', (req, res, next) => {
 
     execSync(
       `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
-      // `python3 mist_v3.py -img temp/input/${filename} --output_name ${filename}`,
+      // `python3 mist_v3.py --block_num 2 -img temp/input/${filename} --output_name ${filename}`,
       {
         cwd: mistDirectory,
       }
