@@ -7,14 +7,18 @@ import { z, ZodError } from 'zod'
 import childProcess, { execSync } from 'child_process'
 import dotenv from 'dotenv'
 import util from 'util'
-import Bull from 'bull'
+import { Queue, QueueEvents, Worker } from 'bullmq'
 
 dotenv.config()
 
 const exec = util.promisify(childProcess.exec)
-const queue = new Bull('mistwork', {
-  redis: { port: 6379, host: process.env.REDIS_URL || 'localhost' },
+
+const queue_name = 'mist'
+
+const queue = new Queue(queue_name, {
+  connection: { port: 6379, host: process.env.REDIS_URL || 'localhost' },
 })
+const queueEvents = new QueueEvents(queue_name)
 
 const router = express.Router()
 
@@ -29,6 +33,25 @@ const requestSchema = z.object({
 })
 
 const mistDirectory = process.env.MIST_DIRECTORY || ''
+
+const worker = new Worker(
+  queue_name,
+  async (job) => {
+    try {
+      await exec(
+        `cp temp/input/${job.data.filename} temp/output/${job.data.filename} && sleep 10`,
+        // `python mist_v3.py --block_num 2 -img temp/input/${job.data.filename} --output_name temp/output/${job.data.filename} --non_resize`,
+        {
+          cwd: mistDirectory,
+        }
+      )
+    } catch (e) {}
+  },
+  {
+    concurrency: 1,
+    connection: { port: 6379, host: process.env.REDIS_URL || 'localhost' },
+  }
+)
 
 function checkPNG(data: Buffer): boolean {
   const pngMagicNum = Buffer.from([0x89, 0x50, 0x4e, 0x47])
@@ -55,13 +78,11 @@ router.post('', async (req, res, next) => {
 
     fs.writeFileSync(inputfilepath, decode)
 
-    await exec(
-      // `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
-      `python mist_v3.py --block_num 2 -img temp/input/${filename} --output_name temp/output/${filename} --non_resize`,
-      {
-        cwd: mistDirectory,
-      }
-    )
+    const mistJob = await queue.add('mistJob', {
+      filename: filename,
+    })
+
+    await mistJob.waitUntilFinished(queueEvents)
 
     console.log(fs.existsSync(outputfilepath))
     const outputBase64Data = fs.readFileSync(outputfilepath, {
@@ -72,7 +93,7 @@ router.post('', async (req, res, next) => {
 
     res.send({
       status: 'success',
-      image: 'data:image/png;base64,' + outputBase64Data,
+      image: 'data:image/png;base64,' + 'outputBase64Data',
     })
   } catch (error) {
     console.log('Failed! ' + filename)
