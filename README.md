@@ -5,6 +5,9 @@ MIST_DIRECTORY="{mist repository directory}"
 ALLOW_ORIGIN="{allow origin url}"
 ```
 
+mist/ is sourced from 
+https://github.com/mist-project/mist
+
 change tail of mist_v3.py 
 ```python
 # tail of mist_v3.py
@@ -15,6 +18,13 @@ change tail of mist_v3.py
         # output_name += '.png'
         print("Output image saved in path {}".format(output_name))
         output.save(output_name)
+```
+
+and make directory
+
+```
+mist/temp/input
+mist/temp/output
 ```
 
 ```
