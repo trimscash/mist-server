@@ -22,7 +22,7 @@ outputs/dirs/*/*.png
 outputs/images/*.png
 outputs/images/*.jpg
 outputs/images/backup
-models/
+./models/
 misted_*.png
 *.bin
 *.ckpt
