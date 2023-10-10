@@ -7,10 +7,14 @@ import { z, ZodError } from 'zod'
 import childProcess, { execSync } from 'child_process'
 import dotenv from 'dotenv'
 import util from 'util'
+import Bull from 'bull'
 
 dotenv.config()
 
 const exec = util.promisify(childProcess.exec)
+const queue = new Bull('mistwork', {
+  redis: { port: 6379, host: process.env.REDIS_URL || 'localhost' },
+})
 
 const router = express.Router()
 
@@ -31,7 +35,7 @@ function checkPNG(data: Buffer): boolean {
   return pngMagicNum.equals(data.slice(0, 4))
 }
 
-router.post('', (req, res, next) => {
+router.post('', async (req, res, next) => {
   const filename = `${crypto.randomUUID()}.png`
   const inputfilepath = path.join(mistDirectory, 'temp/input', filename)
   const outputfilepath = path.join(mistDirectory, 'temp/output', filename)
@@ -46,13 +50,12 @@ router.post('', (req, res, next) => {
 
     const isPNG = checkPNG(decode)
     if (!isPNG) {
-      res.status(500).send('file must be png')
-      return
+      throw 'notPNG'
     }
 
     fs.writeFileSync(inputfilepath, decode)
 
-    execSync(
+    await exec(
       // `cp ${inputfilepath} ${outputfilepath} && sleep 10`,
       `python mist_v3.py --block_num 2 -img temp/input/${filename} --output_name temp/output/${filename} --non_resize`,
       {
@@ -65,6 +68,29 @@ router.post('', (req, res, next) => {
       encoding: 'base64',
     })
 
+    console.log('Done! ' + filename)
+
+    res.send({
+      status: 'success',
+      image: 'data:image/png;base64,' + outputBase64Data,
+    })
+  } catch (error) {
+    console.log('Failed! ' + filename)
+
+    if (error == 'notPNG') {
+      res.status(500).send({ status: 'success', message: 'file must be png' })
+      return
+    }
+
+    if (error instanceof ZodError) {
+      res.status(500).send({ status: 'failed', message: 'ivalid request body' })
+      return
+    }
+
+    res.status(500).send({ status: 'failed', message: 'internal server error' })
+    return
+  } finally {
+    console.log('removing ' + filename)
     // remove temp file
     if (fs.existsSync(inputfilepath)) {
       fs.unlinkSync(inputfilepath)
@@ -72,22 +98,6 @@ router.post('', (req, res, next) => {
     if (fs.existsSync(outputfilepath)) {
       fs.unlinkSync(outputfilepath)
     }
-    console.log('Done! ' + filename)
-
-    res.send({ image: 'data:image/png;base64,' + outputBase64Data })
-  } catch (error) {
-    if (fs.existsSync(inputfilepath)) {
-      fs.unlinkSync(inputfilepath)
-    }
-    if (fs.existsSync(outputfilepath)) {
-      fs.unlinkSync(outputfilepath)
-    }
-    if (error instanceof ZodError) {
-      res.status(500).send('ivalid request body')
-      return
-    }
-    res.status(500).send('internal server error')
-    return
   }
 })
 
