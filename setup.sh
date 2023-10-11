@@ -25,9 +25,9 @@ pip install --force-reinstall pillow
 
 echo "conda activate mist" >> ~/.bashrc
 
-$mist_directory=pwd
+$mist_directory=`pwd`
 
-echo "MIST_DIRECTORY={$mist_directory}" >> ../.env
+echo 'MIST_DIRECTORY="${mist_directory}"' >> ../.env
 
 cd ../../
 
