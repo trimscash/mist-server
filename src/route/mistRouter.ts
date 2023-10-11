@@ -39,8 +39,8 @@ const worker = new Worker(
   async (job) => {
     try {
       await exec(
-        `cp temp/input/${job.data.filename} temp/output/${job.data.filename} && sleep 10`,
-        // `python mist_v3.py --block_num 2 -img temp/input/${job.data.filename} --output_name temp/output/${job.data.filename} --non_resize`,
+        //`cp temp/input/${job.data.filename} temp/output/${job.data.filename} && sleep 10`,
+        `python mist_v3.py --block_num 2 -img temp/input/${job.data.filename} --output_name temp/output/${job.data.filename} --non_resize`,
         {
           cwd: mistDirectory,
         }
