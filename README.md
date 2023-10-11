@@ -58,8 +58,8 @@ curl -X POST http://localhost:4000 -H "Accept: application/json" -H "Content-typ
 get queue status
 
 ##### response
-- `active_job` indicates the job count being processed
-- `wait_job` indicates the job count being processed
+- `active_job` indicates the processing job count 
+- `wait_job` indicates the waiting job count  
 ```
 #response example
 {"status":"success","message":"now queue state","active_job":1,"wait_job":5}
