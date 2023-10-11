@@ -93,7 +93,7 @@ router.post('', async (req, res, next) => {
 
     res.send({
       status: 'success',
-      image: 'data:image/png;base64,' + 'outputBase64Data',
+      image: 'data:image/png;base64,' + outputBase64Data,
     })
   } catch (error) {
     console.log('Failed! ' + filename)
