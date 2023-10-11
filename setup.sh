@@ -5,7 +5,12 @@ sudo apt-get install wget
 sudo apt-get install git
 
 wget https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh 
-sh Anaconda3-2023.09-0-Linux-x86_64.sh 
+sh Anaconda3-2023.09-0-Linux-x86_64.sh -b -p ~/anaconda3
+
+
+echo "source ~/anaconda3/etc/profile.d/conda.sh" >> ~/.bashrc
+source ~/.bashrc
+
 
 cd mist
 
