@@ -3,6 +3,7 @@
 sudo apt-get update
 sudo apt-get install wget
 sudo apt-get install git
+sudo apt-get install redis-server
 
 wget https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh 
 sh Anaconda3-2023.09-0-Linux-x86_64.sh -b -p ~/anaconda3
