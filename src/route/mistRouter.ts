@@ -39,8 +39,8 @@ const worker = new Worker(
   async (job) => {
     try {
       await exec(
-        //`cp temp/input/${job.data.filename} temp/output/${job.data.filename} && sleep 10`,
-        `python mist_v3.py --block_num 2 -img temp/input/${job.data.filename} --output_name temp/output/${job.data.filename} --non_resize`,
+        `cp temp/input/${job.data.filename} temp/output/${job.data.filename} && sleep 10`,
+        // `python mist_v3.py --block_num 2 -img temp/input/${job.data.filename} --output_name temp/output/${job.data.filename} --non_resize`,
         {
           cwd: mistDirectory,
         }
@@ -119,6 +119,21 @@ router.post('', async (req, res, next) => {
     if (fs.existsSync(outputfilepath)) {
       fs.unlinkSync(outputfilepath)
     }
+  }
+})
+
+router.get('', async (req, res, next) => {
+  try {
+    const jobCount = await queue.getJobCounts('active', 'wait')
+
+    res.status(500).send({
+      status: 'success',
+      message: 'now queue state',
+      active_job: jobCount.active,
+      wait_job: jobCount.wait,
+    })
+  } catch (e) {
+    res.status(500).send({ status: 'failed', message: 'internal server error' })
   }
 })
 
