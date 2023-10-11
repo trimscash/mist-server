@@ -37,11 +37,13 @@ npm start
 post base64 decoded image with mime
 
 ##### payload
+- `image`: base64 decoded image with mime
 ```
 #payload example
 { "image" : "data:image/png;base64,~~~~~~~~~"}
 ```
 ##### response
+- `image`: base64 decoded image with mime
 ```
 #response example
 { "status":"success", "image" : "data:image/png;base64,~~~~~~~~~"}
@@ -56,8 +58,8 @@ curl -X POST http://localhost:4000 -H "Accept: application/json" -H "Content-typ
 get queue status
 
 ##### response
-`active_job` indicates the job being processed
-`wait_job` indicates the job being processed
+- `active_job` indicates the job being processed
+- `wait_job` indicates the job being processed
 ```
 #response example
 {"status":"success","message":"now queue state","active_job":1,"wait_job":5}
